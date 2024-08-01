@@ -1,25 +1,25 @@
 package repository
 
-type Todo struct {
+type todo struct {
 	ID   int
 	Name string
 }
 
-func (t Repository) CreateTodo(todo Todo) error {
-	_, err := t.db.Exec("INSERT INTO todos (name) VALUES ($1)", todo.Name)
+func (t Repository) CreateTodo(name string) error {
+	_, err := t.db.Exec("INSERT INTO todos (name) VALUES ($1)", name)
 	return err
 }
 
-func (t Repository) ReadTodo() ([]*Todo, error) {
+func (t Repository) ReadTodo() ([]*todo, error) {
 	rows, err := t.db.Query("SELECT * FROM todos")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var todos []*Todo
+	var todos []*todo
 	for rows.Next() {
-		var todo Todo
+		var todo todo
 		err := rows.Scan(&todo.ID, &todo.Name)
 		if err != nil {
 			return nil, err
@@ -30,8 +30,8 @@ func (t Repository) ReadTodo() ([]*Todo, error) {
 	return todos, err
 }
 
-func (t Repository) UpdateTodo(todo Todo) error {
-	_, err := t.db.Exec("UPDATE todos SET name = $1 WHERE id = $2", todo.Name, todo.ID)
+func (t Repository) UpdateTodo(id int, name string) error {
+	_, err := t.db.Exec("UPDATE todos SET name = $1 WHERE id = $2", name, id)
 	return err
 }
 

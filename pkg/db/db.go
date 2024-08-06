@@ -18,7 +18,10 @@ type DBConfig struct {
 }
 
 func getDBConfig() DBConfig {
-	port, _ := strconv.Atoi(os.Getenv("DB_PORT"))
+	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		port = 3306
+	}
 	return DBConfig{
 		User:     os.Getenv("DB_USER"),
 		Password: os.Getenv("DB_PASSWORD"),

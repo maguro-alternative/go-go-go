@@ -1,15 +1,15 @@
 package repository
 
 import (
-	"database/sql"
+	"gorm.io/gorm"
 )
 
-func NewRepository(db *sql.DB) Repository {
+func NewRepository(db *gorm.DB) Repository {
 	return Repository{
 		db: db,
 	}
 }
 
 type Repository struct {
-	db *sql.DB
+	db *gorm.DB
 }

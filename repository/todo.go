@@ -6,12 +6,12 @@ type todo struct {
 }
 
 func (t Repository) CreateTodo(name string) error {
-	_, err := t.db.Exec("INSERT INTO todos (name) VALUES ($1)", name)
-	return err
+	result := t.db.Create(&todo{Name: name})
+	return result.Error
 }
 
-func (t Repository) ReadTodo() ([]*todo, error) {
-	rows, err := t.db.Query("SELECT * FROM todos")
+func (t Repository) ReadAllTodo() ([]*todo, error) {
+	rows, err := t.db.Find(&todo{}).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -30,12 +30,18 @@ func (t Repository) ReadTodo() ([]*todo, error) {
 	return todos, err
 }
 
+func (t Repository) ReadTodoByID(id int) (*todo, error) {
+	var todo todo
+	result := t.db.First(&todo, id)
+	return &todo, result.Error
+}
+
 func (t Repository) UpdateTodo(id int, name string) error {
-	_, err := t.db.Exec("UPDATE todos SET name = $1 WHERE id = $2", name, id)
-	return err
+	result := t.db.Where("id = ?", id).Updates(&todo{Name: name})
+	return result.Error
 }
 
 func (t Repository) DeleteTodo(id int) error {
-	_, err := t.db.Exec("DELETE FROM todos WHERE id = $1", id)
-	return err
+	result := t.db.Delete(&todo{}, id)
+	return result.Error
 }

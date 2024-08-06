@@ -1,6 +1,6 @@
 package internal
 
 type TodoJson struct {
-	ID   int    `json:"id,omitempty"`
-	Name string `json:"name"`
+	ID      int    `json:"id,omitempty"`
+	Content string `json:"content"`
 }

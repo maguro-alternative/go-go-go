@@ -82,7 +82,7 @@ func createTodo(
 	repo repository.Repository,
 	todoJson internal.TodoJson,
 ) error {
-	return repo.CreateTodo(todoJson.Name)
+	return repo.CreateTodo(todoJson.Content)
 }
 
 func readAllTodo(repo repository.Repository) ([]*internal.TodoJson, error) {
@@ -93,8 +93,8 @@ func readAllTodo(repo repository.Repository) ([]*internal.TodoJson, error) {
 	}
 	for _, todo := range readTodos {
 		todos = append(todos, &internal.TodoJson{
-			ID:   todo.ID,
-			Name: todo.Name,
+			ID:      int(todo.ID),
+			Content: todo.Content,
 		})
 	}
 	return todos, nil
@@ -109,8 +109,8 @@ func readTodoByID(
 		return nil, err
 	}
 	return &internal.TodoJson{
-		ID:   todo.ID,
-		Name: todo.Name,
+		ID:      int(todo.ID),
+		Content: todo.Content,
 	}, nil
 }
 
@@ -118,7 +118,7 @@ func updateTodo(
 	repo repository.Repository,
 	todoJson internal.TodoJson,
 ) error {
-	return repo.UpdateTodo(todoJson.ID, todoJson.Name)
+	return repo.UpdateTodo(todoJson.ID, todoJson.Content)
 }
 
 func deleteTodo(repo repository.Repository, id int) error {

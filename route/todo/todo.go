@@ -1,8 +1,10 @@
 package todo
 
 import (
-	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
 
 	"maguro-alternative/go-go-go/repository"
 	"maguro-alternative/go-go-go/route/todo/internal"
@@ -20,27 +22,60 @@ func NewTodoService(
 	}
 }
 
-func (t TodoService) Todo(w http.ResponseWriter, r *http.Request) {
+func (t TodoService) Todo(r *gin.Engine) {
 	var todoJson internal.TodoJson
-	err := json.NewDecoder(r.Body).Decode(&todoJson)
-	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	switch r.Method {
-	case http.MethodGet:
-		readTodo(t.repo)
-	case http.MethodPost:
-		createTodo(t.repo, todoJson)
-	case http.MethodPut:
-		updateTodo(t.repo, todoJson)
-	case http.MethodDelete:
-		deleteTodo(t.repo, todoJson.ID)
-	default:
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-	w.Write([]byte("Hello, World!"))
+	r.POST("/todo", func(c *gin.Context) {
+		if err := c.ShouldBindJSON(&todoJson); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if err := createTodo(t.repo, todoJson); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Todo created"})
+	})
+	r.GET("/todo", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err == nil {
+			todo, err := readTodoByID(t.repo, id)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"todo": todo})
+			return
+		}
+		todos, err := readAllTodo(t.repo)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"todos": todos})
+	})
+	r.PUT("/todo", func(c *gin.Context) {
+		if err := c.ShouldBindJSON(&todoJson); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if err := updateTodo(t.repo, todoJson); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Todo updated"})
+	})
+	r.DELETE("/todo/:id", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid ID"})
+			return
+		}
+		if err := deleteTodo(t.repo, id); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Todo deleted"})
+	})
 }
 
 func createTodo(
@@ -50,9 +85,9 @@ func createTodo(
 	return repo.CreateTodo(todoJson.Name)
 }
 
-func readTodo(repo repository.Repository) ([]*internal.TodoJson, error) {
+func readAllTodo(repo repository.Repository) ([]*internal.TodoJson, error) {
 	var todos []*internal.TodoJson
-	readTodos, err := repo.ReadTodo()
+	readTodos, err := repo.ReadAllTodo()
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +98,20 @@ func readTodo(repo repository.Repository) ([]*internal.TodoJson, error) {
 		})
 	}
 	return todos, nil
+}
+
+func readTodoByID(
+	repo repository.Repository,
+	id int,
+) (*internal.TodoJson, error) {
+	todo, err := repo.ReadTodoByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return &internal.TodoJson{
+		ID:   todo.ID,
+		Name: todo.Name,
+	}, nil
 }
 
 func updateTodo(

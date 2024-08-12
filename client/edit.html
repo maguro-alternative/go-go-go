@@ -1,0 +1,81 @@
+<html>
+    <body>
+        <h1 class="page-title">
+            {{ .title }}
+        </h1>
+
+        <form class="todo-form" action="/todo/update" method="POST">
+            <input type="hidden" name="id" value="{{.todo.ID}}" />
+            <div class="form-header">Todos更新</div>
+            <div class="form-body">
+                <textarea class="todo-textarea" name="content" placeholder="Todoを更新" rows="4">{{.todo.Content}}</textarea>
+                <button class="submit-button" type="submit">更新</button>
+            </div>
+        </form>
+
+        <hr class="separator" />
+    </body>
+</html>
+
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 20px;
+}
+
+.page-title {
+    color: #007BFF;
+    text-align: center;
+}
+
+.todo-form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.form-header {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.form-body {
+    margin-bottom: 20px;
+}
+
+.todo-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    margin-bottom: 10px;
+}
+
+.submit-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: block; /* Makes the button block level, which might be preferable in some designs */
+    width: 100%; /* Adjust if you want a smaller button */
+}
+
+.submit-button:hover {
+    background-color: #218838;
+}
+
+.separator {
+    border-top: 1px solid #ccc;
+    margin-top: 20px;
+}
+
+</style>

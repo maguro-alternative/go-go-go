@@ -1,0 +1,103 @@
+<html>
+    <body>
+        <h1 class="page-title">
+            {{ .title }}
+        </h1>
+
+        <form class="todo-form" action="/todo/create" method="POST">
+            <div class="form-header">todo作成</div>
+            <div class="form-body">
+                <textarea class="todo-textarea" name="content" id="content" placeholder="Todoを追加" rows="4"></textarea>
+                <button class="submit-button" type="submit">作成</button>
+            </div>
+        </form>
+
+        <hr class="separator" />
+
+        {{ range .todos }}
+            <div class="todo-item">
+                <p class="todo-content"><a class="edit-link" href="/edit?id={{.ID}}">{{ .ID }}:{{ .Content }}</a></p>
+                <a class="delete-link" href="/todo/delete?id={{ .ID }}">[削除]</a>
+            </div>
+        {{ end }}
+    </body>
+</html>
+
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 20px;
+}
+
+.page-title {
+    color: #007BFF;
+    text-align: center;
+}
+
+.todo-form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.form-header {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.form-body {
+    margin-bottom: 20px;
+}
+
+.todo-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: none;
+    margin-bottom: 10px;
+}
+
+.submit-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    float: right;
+}
+
+.submit-button:hover {
+    background-color: #218838;
+}
+
+.separator {
+    border-top: 1px solid #ccc;
+    margin-top: 20px;
+}
+
+.todo-item {
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-top: 10px;
+}
+
+.edit-link, .delete-link {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.edit-link:hover, .delete-link:hover {
+    text-decoration: underline;
+}
+
+</style>

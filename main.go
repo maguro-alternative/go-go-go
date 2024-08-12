@@ -58,6 +58,7 @@ func listeners(r *gin.Engine, db *gorm.DB) {
 		id, _ := c.GetQuery("id")
 		result := db.Delete(&Todo{}, id)
 		if errorDB(result, c) { return }
+		c.Redirect(http.StatusMovedPermanently, "/index")
 	})
 
 	r.POST("/todo/update", func(c *gin.Context) {
@@ -69,6 +70,7 @@ func listeners(r *gin.Engine, db *gorm.DB) {
 		todo.Content = content
 		result = db.Save(&todo)
 		if errorDB(result, c) { return }
+		c.Redirect(http.StatusMovedPermanently, "/index")
 	})
 
 	r.POST("/todo/create", func(c *gin.Context) {
@@ -76,6 +78,7 @@ func listeners(r *gin.Engine, db *gorm.DB) {
 		fmt.Println(c.Request.PostForm, content)
 		result := db.Create(&Todo{Content: content})
 		if errorDB(result, c) { return }
+		c.Redirect(http.StatusMovedPermanently, "/index")
 	})
 
 	r.GET("/todo/list", func(c *gin.Context) {
@@ -96,12 +99,35 @@ func listeners(r *gin.Engine, db *gorm.DB) {
 		fmt.Println(json.NewEncoder(os.Stdout).Encode(todo))
 		c.JSON(http.StatusOK, todo)
 	})
+
+	r.GET("/index", func(c *gin.Context) {
+		var todos []Todo
+		result := db.Find(&todos)
+		if errorDB(result, c) { return }
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title": "やることリスト",
+			"todos": todos,
+		})
+	})
+
+	//todo edit
+	r.GET("/edit", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Query("id"))
+		if err != nil {
+			log.Fatalln(err)
+		}
+		var todo Todo
+		db.Where("id = ?", id).Take(&todo)
+		c.HTML(http.StatusOK, "edit.html", gin.H{
+			"title": "Todoの編集",
+			"todo":  todo,
+		})
+	})
 }
 
 func main() {
 	r := gin.Default()
 	db, err := connectionDB()
-
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -111,7 +137,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
-
+	r.LoadHTMLGlob("client/*")
 	listeners(r, db)
 
 	fmt.Println("Database connection and setup successful")
